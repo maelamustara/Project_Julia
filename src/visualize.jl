@@ -1,4 +1,14 @@
-# MazeViz struct for visualization logic
+#=
+Idee, um struct MazeViz zu ändern um es an random_stack anzupassen:
+struct MazeViz
+    mat::Matrix{Node}
+    start::Node
+    exit::Node
+end
+
+Dann bei Visualisierung kann man nehmen: mat ~ random_stack(A)[1], start ~ random_stack(A)[2], exit ~ random_stack(A)[3]
+=#
+
 struct MazeViz
     mat::Matrix{Node}
 end
