@@ -1,14 +1,27 @@
-# MazeViz struct for visualization logic
 struct MazeViz
     mat::Matrix{Node}
+    path::Vector{Node}
 end
 
-# Function to draw the maze in the terminal
+# Function to draw the maze with the solution path in the terminal
 function draw_maze(viz::MazeViz)
     mat = viz.mat
+    path = viz.path
     height, width = size(mat)
     output = IOBuffer()
 
+    function node_position(mat, target_node)
+        for i in 1:size(mat, 1)
+            for j in 1:size(mat, 2)
+                if mat[i, j] === target_node
+                    return (i, j)
+                end
+            end
+        end
+        return nothing
+    end
+
+    # Draw the maze with walls
     for i in 1:height
         # Draw the top boundary of the row
         for j in 1:width
@@ -21,13 +34,40 @@ function draw_maze(viz::MazeViz)
         end
         println(output, "+")
 
-        # Draw the side boundaries and paths of the row
+        # Draw the side boundaries of the row
         for j in 1:width
             node = mat[i, j]
             if node.left === nothing
-                print(output, "|   ")
+                print(output, "|")
             else
-                print(output, "    ")
+                print(output, " ")
+            end
+
+            if node in path
+                if node === path[1]
+                    print(output, " S ")
+                elseif node === path[end]
+                    print(output, " E ")
+                else
+                    # Determine the direction symbol
+                    idx = findfirst(==(node), path)
+                    if idx < length(path)
+                        next_node = path[idx + 1]
+                        current_pos = node_position(mat, node)
+                        next_pos = node_position(mat, next_node)
+                        if next_pos[1] < current_pos[1]
+                            print(output, " ↑ ")
+                        elseif next_pos[1] > current_pos[1]
+                            print(output, " ↓ ")
+                        elseif next_pos[2] < current_pos[2]
+                            print(output, " ← ")
+                        elseif next_pos[2] > current_pos[2]
+                            print(output, " → ")
+                        end
+                    end
+                end
+            else
+                print(output, "   ")
             end
         end
         println(output, "|")
@@ -49,6 +89,12 @@ end
 
 # Overload Base.show for the matrix of Nodes
 function Base.show(io::IO, mat::Matrix{Node})
-    viz = MazeViz(mat)
+    viz = MazeViz(mat, Vector{Node}())
+    show(io, viz)
+end
+
+# Overload Base.show for the matrix of Nodes with the solution path
+function Base.show(io::IO, mat::Matrix{Node}, path::Vector{Node})
+    viz = MazeViz(mat, path)
     show(io, viz)
 end
