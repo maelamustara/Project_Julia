@@ -1,3 +1,4 @@
+
 struct MazeViz
     mat::Matrix{Node}
     path::Vector{Node}
